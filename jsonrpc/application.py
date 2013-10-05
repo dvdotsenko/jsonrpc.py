@@ -111,12 +111,12 @@ class JSONPRCApplication(JSONPRCCollection):
 
         return responses
 
-    def handle(self, request_string):
+    def handle_request_string(self, request_string):
         """Handle a RPC-Request.
 
         :Parameters:
             - request_string: the received rpc-string
-        :Returns: the encoded (serialized) JSON of the response
+        :Returns: the encoded (serialized as string) JSON of the response
         """
 
         ds = self._data_serializer

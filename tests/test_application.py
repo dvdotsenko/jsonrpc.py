@@ -56,7 +56,7 @@ class JSONPRCApplicationTestSuite(TestCase):
         )
         requests_string = json.dumps([request1, request2])
 
-        response_string = self.app.handle(requests_string)
+        response_string = self.app.handle_request_string(requests_string)
 
         responses_data = json.loads(response_string)
 
