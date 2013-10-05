@@ -64,7 +64,7 @@ class JSONPRCWSGIApplicationTestSuite(TestCase):
         )
         start_response = MockWSGIStartResponse()
 
-        response_iterable = self.app.handle_wsgi_request(environ, start_response)
+        response_iterable = self.app(environ, start_response)
 
         assert response_iterable
 
