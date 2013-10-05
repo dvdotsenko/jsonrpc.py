@@ -13,6 +13,8 @@ class Client(object):
         :Parameters:
             - data_serializer: a data_structure+serializer-instance
         """
+        self._in_batch_mode = False
+        self._requests = []
         self._data_serializer = data_serializer
 
     # Context manager API
@@ -58,7 +60,7 @@ class Client(object):
             return request
 
     def get_batched(self):
-        if not getattr(self, '_in_batch_mode', False):
+        if not self._in_batch_mode:
             return []
         else:
-            return getattr(self, '_requests', [])
+            return self._requests
