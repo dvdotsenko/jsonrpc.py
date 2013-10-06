@@ -2,6 +2,7 @@
 JSON-RPC (especially v2) prescribes specific error messaging and codes
 Here we store the error codes and code that helps us format the errors.
 
+This file is part of `jsonrpcparts` project. See project's source for license and copyright.
 """
 
 #JSON-RPC 2.0 error-codes

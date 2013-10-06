@@ -1,6 +1,7 @@
 """
 This module contains code that simplifies the job of JSON-RPC clients.
 
+This file is part of `jsonrpcparts` project. See project's source for license and copyright.
 """
 import json
 

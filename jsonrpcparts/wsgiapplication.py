@@ -2,6 +2,7 @@
 This module contains code that allows one to have this generic collection
 that supports discovery and use of the registered methods.
 
+This file is part of `jsonrpcparts` project. See project's source for license and copyright.
 """
 from . import JSONPRCApplication
 

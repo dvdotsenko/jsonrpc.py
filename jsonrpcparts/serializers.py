@@ -3,6 +3,7 @@ JSON-RPC (especially v2) prescribes that the message format adheres
 to a specific format/schema. This module contains code that helps
 in serializing data (including errors) into JSON-RPC message format.
 
+This file is part of `jsonrpcparts` project. See project's source for license and copyright.
 """
 
 import json
