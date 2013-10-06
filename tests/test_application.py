@@ -3,7 +3,7 @@ import time
 
 from unittest import TestCase
 
-from jsonrpc import JSONPRCApplication, JSONRPC20Serializer, errors
+from jsonrpcparts import JSONPRCApplication, JSONRPC20Serializer, errors
 
 class JSONPRCApplicationTestSuite(TestCase):
 

@@ -3,7 +3,7 @@ import time
 
 from unittest import TestCase
 
-from jsonrpc import JSONPRCCollection, errors
+from jsonrpcparts import JSONPRCCollection, errors
 
 class JSONPRCCollectionTestSuite(TestCase):
 

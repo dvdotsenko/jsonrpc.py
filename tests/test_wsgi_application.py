@@ -5,8 +5,8 @@ import StringIO
 
 from unittest import TestCase
 
-from jsonrpc import JSONRPC20Serializer, errors
-from jsonrpc.wsgiapplication import JSONPRCWSGIApplication
+from jsonrpcparts import JSONRPC20Serializer, errors
+from jsonrpcparts.wsgiapplication import JSONPRCWSGIApplication
 
 class MockWSGIEnviron(dict):
 
