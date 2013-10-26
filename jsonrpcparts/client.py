@@ -31,6 +31,10 @@ class Client(object):
         pass
 
     def call(self, method, *args, **kw):
+        """
+        In context of a batch we return the request's ID
+        else we return the actual json
+        """
         if args and kw:
             raise ValueError("JSON-RPC method calls allow only either named or positional arguments.")
         if not method:
@@ -42,6 +46,7 @@ class Client(object):
 
         if self._in_batch_mode:
             self._requests.append(request)
+            return request.get('id')
         else:
             return request
 
