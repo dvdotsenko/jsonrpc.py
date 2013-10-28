@@ -1,0 +1,1 @@
+requests # needed for JSON-RPC Web Client

@@ -11,6 +11,7 @@ This file is part of `jsonrpcparts` project. See project's source for license an
 import json
 
 from . import errors
+from .serializers import JSONRPC20Serializer
 
 class JSONPRCCollection(dict):
     """
@@ -57,7 +58,7 @@ class JSONPRCCollection(dict):
 
 class JSONPRCApplication(JSONPRCCollection):
 
-    def __init__(self, data_serializer, *args, **kw):
+    def __init__(self, data_serializer=JSONRPC20Serializer, *args, **kw):
         """
         :Parameters:
             - data_serializer: a data_structure+serializer-instance
