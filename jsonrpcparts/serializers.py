@@ -7,8 +7,9 @@ This file is part of `jsonrpcparts` project. See project's source for license an
 """
 
 import json
-import time
 import random
+import time
+import uuid
 
 from . import errors
 
@@ -272,15 +273,15 @@ class JSONRPC20Serializer:
             base["params"] = params
 
         if not notification:
-            base['id'] = long(time.time() * 1000)
+            base['id'] = str(uuid.uuid4())
 
         return base
 
     @staticmethod
     def assemble_response(result, request_id):
         return {
-            "jsonrpc": "2.0", 
-            "result": result, 
+            "jsonrpc": "2.0",
+            "result": result,
             "id": request_id
         }
 
@@ -292,21 +293,21 @@ class JSONRPC20Serializer:
 
         if error.error_data is None:
             return {
-                "jsonrpc": "2.0", 
+                "jsonrpc": "2.0",
                 "error": {
-                    "code":error.error_code, 
+                    "code":error.error_code,
                     "message":error.message
-                }, 
+                },
                 "id": error.request_id
             }
         else:
             return {
-                "jsonrpc": "2.0", 
+                "jsonrpc": "2.0",
                 "error": {
-                    "code":error.error_code, 
+                    "code":error.error_code,
                     "message": error.message,
                     "data": error.error_data
-                }, 
+                },
                 "id": error.request_id
             }
 

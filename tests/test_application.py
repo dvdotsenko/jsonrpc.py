@@ -26,6 +26,9 @@ class JSONPRCApplicationTestSuite(TestCase):
             'adder',
             (4, 3)
         )
+
+        assert request1['id'] != request2['id']
+
         requests, is_batch_mode = JSONRPC20Serializer.parse_request(
             json.dumps([request1, request2])
         )
@@ -36,7 +39,7 @@ class JSONPRCApplicationTestSuite(TestCase):
 
         response_json = responses[0]
         assert 'error' not in response_json
-        assert response_json['id'] == request2['id']
+        assert response_json['id'] == request1['id']
         assert response_json['result'] == 5
 
         response_json = responses[1]
@@ -64,7 +67,7 @@ class JSONPRCApplicationTestSuite(TestCase):
 
         response_json = responses_data[0]
         assert 'error' not in response_json
-        assert response_json['id'] == request2['id']
+        assert response_json['id'] == request1['id']
         assert response_json['result'] == 5
 
         response_json = responses_data[1]

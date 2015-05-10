@@ -75,7 +75,7 @@ class JSONPRCWSGIApplicationTestSuite(TestCase):
 
         response_json = responses_data[0]
         assert 'error' not in response_json
-        assert response_json['id'] == request2['id']
+        assert response_json['id'] == request1['id']
         assert response_json['result'] == 5
 
         response_json = responses_data[1]
