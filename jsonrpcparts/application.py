@@ -107,7 +107,8 @@ class JSONPRCApplication(JSONPRCCollection):
                     responses.append(ds.assemble_error_response(
                         errors.RPCInternalError(
                             'While processing the follwoing message ("%s","%s","%s") ' % (method, params, request_id) +\
-                            'encountered the following error message "%s"' % ex.message
+                            'encountered the following error message "%s"' % ex.message,
+                            request_id=request_id
                         )
                     ))
 
