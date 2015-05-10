@@ -13,8 +13,15 @@ class JSONPRCApplicationTestSuite(TestCase):
         def adder(a, b):
             return a + b
 
+        class MyTestException(Exception):
+            pass
+
+        def blow_up(*args, **kwargs):
+            raise MyTestException('Blowing up on command')
+
         self.app = JSONPRCApplication(JSONRPC20Serializer)
         self.app.register_function(adder)
+        self.app.register_function(blow_up)
 
     def test_process_requests(self):
 
@@ -41,6 +48,34 @@ class JSONPRCApplicationTestSuite(TestCase):
         assert 'error' not in response_json
         assert response_json['id'] == request1['id']
         assert response_json['result'] == 5
+
+        response_json = responses[1]
+        assert 'error' not in response_json
+        assert response_json['id'] == request2['id']
+        assert response_json['result'] == 7
+
+    def test_process_requests_with_errors(self):
+
+        request1 = JSONRPC20Serializer.assemble_request(
+            'blow_up',
+            (2, 3)
+        )
+        request2 = JSONRPC20Serializer.assemble_request(
+            'adder',
+            (4, 3)
+        )
+        requests, is_batch_mode = JSONRPC20Serializer.parse_request(
+            json.dumps([request1, request2])
+        )
+
+        responses = self.app.process_requests(requests)
+
+        assert len(responses) == 2
+
+        response_json = responses[0]
+        assert 'error' in response_json
+        assert set(response_json['error'].keys()) == {'code', 'message', 'data'}
+        assert response_json['id'] == request1['id']
 
         response_json = responses[1]
         assert 'error' not in response_json
