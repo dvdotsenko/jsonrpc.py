@@ -1,12 +1,6 @@
-import sys
 from setuptools import setup, find_packages
 
-from pip.req import parse_requirements
-install_reqs = parse_requirements('./requirements.txt')
-requirements = [str(ir.req) for ir in install_reqs]
-
-with open('jsonrpcparts/VERSION') as version_file:
-    version = version_file.read().strip()
+version = '0.3.4'
 
 long_description = """
 JSON-RPC Parts is a library of composable components one would need to assemble a JSON-RPC server or client.
@@ -49,13 +43,10 @@ if __name__ == "__main__":
         keywords = ['JSON', 'jsonrpc', 'rpc', 'wsgi'],
         license='MIT',
         packages=find_packages(),
-        package_data={
-            '':['VERSION','LICENSE']
-        },
         include_package_data=True,
-        install_requires=requirements
+        install_requires=['requests']
     )
 
-    # Next:
-    # python setup.py register
-    # python setup.py sdist upload
+# Next:
+# python setup.py register
+# python setup.py sdist upload
