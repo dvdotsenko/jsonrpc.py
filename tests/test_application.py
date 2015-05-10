@@ -1,5 +1,7 @@
+import datetime
 import json
 import time
+import uuid
 
 from unittest import TestCase
 
@@ -37,7 +39,7 @@ class JSONPRCApplicationTestSuite(TestCase):
         assert request1['id'] != request2['id']
 
         requests, is_batch_mode = JSONRPC20Serializer.parse_request(
-            json.dumps([request1, request2])
+            JSONRPC20Serializer.json_dumps([request1, request2])
         )
 
         responses = self.app.process_requests(requests)
@@ -65,7 +67,7 @@ class JSONPRCApplicationTestSuite(TestCase):
             (4, 3)
         )
         requests, is_batch_mode = JSONRPC20Serializer.parse_request(
-            json.dumps([request1, request2])
+            JSONRPC20Serializer.json_dumps([request1, request2])
         )
 
         responses = self.app.process_requests(requests)
@@ -92,11 +94,11 @@ class JSONPRCApplicationTestSuite(TestCase):
             'adder',
             (4, 3)
         )
-        requests_string = json.dumps([request1, request2])
+        requests_string = JSONRPC20Serializer.json_dumps([request1, request2])
 
         response_string = self.app.handle_request_string(requests_string)
 
-        responses_data = json.loads(response_string)
+        responses_data = JSONRPC20Serializer.json_loads(response_string)
 
         assert len(responses_data) == 2
 
@@ -109,3 +111,49 @@ class JSONPRCApplicationTestSuite(TestCase):
         assert 'error' not in response_json
         assert response_json['id'] == request2['id']
         assert response_json['result'] == 7
+
+
+class JSONPRCApplicationNonStandardJSONEncoderTestSuite(TestCase):
+
+    def test_handle_request_string_non_standard_json_encoder(self):
+
+        some_guid = uuid.uuid4()
+
+        def get_misshaped_objects(*args):
+            return [
+                {1,2},
+                some_guid
+            ]
+
+        class MyCustomJSONEncoder(JSONRPC20Serializer.json_encoder):
+
+            def default(self, o):
+                if isinstance(o, set):
+                    return list(o)
+                if isinstance(o, uuid.UUID):
+                    return str(o)
+                return super(MyCustomJSONEncoder, self).default(o)
+
+        class MyCustomJSONSerializer(JSONRPC20Serializer):
+
+            json_encoder = MyCustomJSONEncoder
+
+        self.app = JSONPRCApplication(MyCustomJSONSerializer)
+        self.app.register_function(get_misshaped_objects)
+
+        request = MyCustomJSONSerializer.assemble_request(
+            'get_misshaped_objects'
+        )
+        requests_string = MyCustomJSONSerializer.json_dumps(request)
+
+        response_string = self.app.handle_request_string(requests_string)
+
+        response_json = MyCustomJSONSerializer.json_loads(response_string)
+
+        assert 'error' not in response_json
+        assert response_json['id'] == request['id']
+        assert response_json['result'] == [
+            [1, 2],
+            str(some_guid)
+        ]
+

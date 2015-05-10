@@ -53,7 +53,7 @@ class JSONPRCWSGIApplicationTestSuite(TestCase):
             'adder',
             (4, 3)
         )
-        requests_string = json.dumps([request1, request2])
+        requests_string = JSONRPC20Serializer.json_dumps([request1, request2])
 
         environ = MockWSGIEnviron(
             requests_string,
@@ -69,7 +69,7 @@ class JSONPRCWSGIApplicationTestSuite(TestCase):
         assert response_iterable
 
         response_string = ''.join(response_iterable)
-        responses_data = json.loads(response_string)
+        responses_data = JSONRPC20Serializer.json_loads(response_string)
 
         assert len(responses_data) == 2
 

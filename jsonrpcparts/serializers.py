@@ -23,10 +23,81 @@ def clean_dict_keys(d):
         new_d[str(k)] = v
     return new_d
 
+
+class BaseJSONRPCSerializer(object):
+    """
+    Common base class for various json rpc serializers
+    Mostly done just for keeping track of common methods and attributes
+    (and thus define some sort of internal API/signature for these)
+    """
+
+    # these are used in stringify/destringify calls like so:
+    # json_data_string = json.dumps(data, cls=json_encoder)
+    # and allow users to customize the encoder used, thus allowing
+    # support for json-serialization of "odd" types like sets, UUID, models ets.
+    # by default it's the default JSONEncoder
+    json_decoder = json.JSONDecoder
+    json_encoder = json.JSONEncoder
+
+    @classmethod
+    def json_dumps(cls, obj, **kwargs):
+        """
+        A rewrap of json.dumps done for one reason - to inject a custom `cls` kwarg
+
+        :param obj:
+        :param kwargs:
+        :return:
+        :rtype: str
+        """
+        if 'cls' not in kwargs:
+            kwargs['cls'] = cls.json_encoder
+        return json.dumps(obj, **kwargs)
+
+    @classmethod
+    def json_loads(cls, s, **kwargs):
+        """
+        A rewrap of json.loads done for one reason - to inject a custom `cls` kwarg
+
+        :param s:
+        :param kwargs:
+        :return:
+        :rtype: dict
+        """
+        if 'cls' not in kwargs:
+            kwargs['cls'] = cls.json_decoder
+        return json.loads(s, **kwargs)
+
+    @staticmethod
+    def assemble_request(method, *args, **kwargs):
+        """serialize JSON-RPC-Request
+        """
+        raise NotImplemented
+
+    @staticmethod
+    def assemble_response(result, *args, **kwargs):
+        """serialize a JSON-RPC-Response (without error)
+        """
+        raise NotImplemented
+
+    @staticmethod
+    def parse_request(jsonrpc_message_as_string, *args, **kwargs):
+        """We take apart JSON-RPC-formatted message as a string and decompose it
+        into a dictionary object, emitting errors if parsing detects issues with
+        the format of the message.
+        """
+        raise NotImplemented
+
+    @staticmethod
+    def parse_response(jsonrpc_message_as_string, *args, **kwargs):
+        """de-serialize a JSON-RPC Response/error
+        """
+        raise NotImplemented
+
+
 #----------------------
 # JSON-RPC 1.0
 
-class JSONRPC10Serializer:
+class JSONRPC10Serializer(BaseJSONRPCSerializer):
     """JSON-RPC V1.0 data-structure / serializer
 
     This implementation is quite liberal in what it accepts: It treats
@@ -131,8 +202,8 @@ class JSONRPC10Serializer:
                 "id": id
             }
 
-    @staticmethod
-    def parse_request(jsonrpc_message):
+    @classmethod
+    def parse_request(cls, jsonrpc_message):
         """We take apart JSON-RPC-formatted message as a string and decompose it
         into a dictionary object, emitting errors if parsing detects issues with
         the format of the message.
@@ -143,7 +214,7 @@ class JSONRPC10Serializer:
         :Raises:    RPCParseError, RPCInvalidRPC, RPCInvalidMethodParams
         """
         try:
-            data = json.loads(jsonrpc_message)
+            data = cls.json_loads(jsonrpc_message)
         except ValueError, err:
             raise errors.RPCParseError("No valid JSON. (%s)" % str(err))
 
@@ -168,8 +239,8 @@ class JSONRPC10Serializer:
         else:
             return data["method"], data["params"], data["id"] #request
 
-    @staticmethod
-    def parse_response(jsonrpc_message):
+    @classmethod
+    def parse_response(cls, jsonrpc_message):
         """de-serialize a JSON-RPC Response/error
 
         :Returns: | [result, id] for Responses
@@ -179,7 +250,7 @@ class JSONRPC10Serializer:
                     is raised.
         """
         try:
-            data = json.loads(jsonrpc_message)
+            data = cls.json_loads(jsonrpc_message)
         except ValueError, err:
             raise errors.RPCParseError("No valid JSON. (%s)" % str(err))
         if not isinstance(data, dict):
@@ -242,7 +313,7 @@ class JSONRPC10Serializer:
 #----------------------
 # JSON-RPC 2.0
 
-class JSONRPC20Serializer:
+class JSONRPC20Serializer(BaseJSONRPCSerializer):
 
     @staticmethod
     def assemble_request(method, params=None, notification=False):
@@ -381,7 +452,7 @@ class JSONRPC20Serializer:
         :Raises:    RPCParseError, RPCInvalidRequest
         """
         try:
-            batch = json.loads(request_string)
+            batch = cls.json_loads(request_string)
         except ValueError as err:
             raise errors.RPCParseError("No valid JSON. (%s)" % str(err))
 
@@ -467,7 +538,7 @@ class JSONRPC20Serializer:
         :Raises:    RPCParseError, RPCInvalidRequest
         """
         try:
-            batch = json.loads(response_string)
+            batch = cls.json_loads(response_string)
         except ValueError as err:
             raise errors.RPCParseError("No valid JSON. (%s)" % str(err))
 

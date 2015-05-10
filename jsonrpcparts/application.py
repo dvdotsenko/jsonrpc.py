@@ -127,9 +127,9 @@ class JSONPRCApplication(JSONPRCCollection):
         try:
             requests, is_batch_mode = ds.parse_request(request_string)
         except errors.RPCFault as ex:
-            return json.dumps(ds.assemble_error_response(ex))
+            return ds.json_dumps(ds.assemble_error_response(ex))
         except Exception as ex:
-            return json.dumps(ds.assemble_error_response(
+            return ds.json_dumps(ds.assemble_error_response(
                 errors.RPCInternalError(
                     'While processing the follwoing message "%s" ' % request_string +\
                     'encountered the following error message "%s"' % ex.message
@@ -143,9 +143,9 @@ class JSONPRCApplication(JSONPRCCollection):
 
         try:
             if is_batch_mode:
-                return json.dumps(responses)
+                return ds.json_dumps(responses)
             else:
-                return json.dumps(responses[0])
+                return ds.json_dumps(responses[0])
         except Exception as ex:
             return json.dumps(
                 ds.assemble_error_response(
