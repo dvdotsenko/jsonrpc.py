@@ -3,7 +3,7 @@ import json
 import time
 import uuid
 
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from jsonrpcparts import JSONPRCApplication, JSONRPC20Serializer, errors
 
@@ -165,3 +165,36 @@ class JSONPRCApplicationNonStandardJSONEncoderTestSuite(TestCase):
             str(some_guid)
         ]
 
+
+class JSONPRCApplicationLatentSerializationErrorsTestSuite(TestCase):
+
+    @skip(
+        "Serializer is used at the point where request ID is already baked into data. "
+        "Plus in case of batch, which one to use?"
+        "Revisit this when serializer can pre-encode individual object in batches"
+    )
+    def test_handle_request_string_non_standard_json_encoder(self):
+
+        serializer = JSONRPC20Serializer
+
+        some_guid = uuid.uuid4()
+
+        def get_misshaped_objects(*args):
+            return some_guid
+
+        app = JSONPRCApplication(serializer)
+        app.register_function(get_misshaped_objects)
+
+        request = serializer.assemble_request(
+            'get_misshaped_objects'
+        )
+        requests_string = serializer.json_dumps(request)
+        response_string = app.handle_request_string(requests_string)
+        response_json = serializer.json_loads(response_string)
+
+        assert 'error' in response_json
+        assert 'is not JSON serializable' in response_json['error']['data']
+        self.assertEqual(
+            request['id'],
+            response_json['id']
+        )
