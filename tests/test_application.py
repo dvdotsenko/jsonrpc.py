@@ -12,8 +12,8 @@ class JSONPRCApplicationTestSuite(TestCase):
     def setUp(self):
         super(JSONPRCApplicationTestSuite, self).setUp()
 
-        def adder(a, b):
-            return a + b
+        def adder(*args):
+            return sum(args)
 
         class MyTestException(Exception):
             pass
@@ -35,16 +35,19 @@ class JSONPRCApplicationTestSuite(TestCase):
             'adder',
             (4, 3)
         )
+        request3 = JSONRPC20Serializer.assemble_request(
+            'adder' # note: no args. 'adder' can take it. JSONRpc app must too
+        )
 
-        assert request1['id'] != request2['id']
+        assert len({request1['id'], request2['id'], request3['id']}) == 3
 
         requests, is_batch_mode = JSONRPC20Serializer.parse_request(
-            JSONRPC20Serializer.json_dumps([request1, request2])
+            JSONRPC20Serializer.json_dumps([request1, request2, request3])
         )
 
         responses = self.app.process_requests(requests)
 
-        assert len(responses) == 2
+        assert len(responses) == 3
 
         response_json = responses[0]
         assert 'error' not in response_json
@@ -55,6 +58,11 @@ class JSONPRCApplicationTestSuite(TestCase):
         assert 'error' not in response_json
         assert response_json['id'] == request2['id']
         assert response_json['result'] == 7
+
+        response_json = responses[2]
+        assert 'error' not in response_json
+        assert response_json['id'] == request3['id']
+        assert response_json['result'] == 0
 
     def test_process_requests_with_errors(self):
 

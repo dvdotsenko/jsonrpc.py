@@ -96,7 +96,8 @@ class JSONPRCApplication(JSONPRCCollection):
                 if isinstance(params, dict):
                     result = self[method](**params)
                 else:
-                    result = self[method](*params)
+                    # this is where we allow not specifying params
+                    result = self[method](*(params or []))
                 if request_id:
                     responses.append(ds.assemble_response(result, request_id))
             except errors.RPCFault as ex:
