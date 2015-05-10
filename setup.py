@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.3.5'
+version = '0.3.6'
 
 long_description = """
 JSON-RPC Parts is a library of composable components one would need to assemble a JSON-RPC server or client.

@@ -1,3 +1,8 @@
+0.3.6 Fix for RPC application and allow overriding JSON serializer
+
+- Feature - allow override JSON Encoder and Decoder by overriding *Serializer class
+- Fix RPC application not liking when `params` attribute is not provided
+
 0.3.5 Fixes for RPC client and application
 
 - Fix same-millisecond-generated request_id are identical issue
