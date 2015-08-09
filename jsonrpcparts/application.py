@@ -109,7 +109,8 @@ class JSONPRCApplication(JSONPRCCollection):
                         errors.RPCInternalError(
                             'While processing the follwoing message ("%s","%s","%s") ' % (method, params, request_id) +\
                             'encountered the following error message "%s"' % ex.message,
-                            request_id=request_id
+                            request_id=request_id,
+                            message=ex.message
                         )
                     ))
 
