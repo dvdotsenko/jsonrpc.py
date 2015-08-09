@@ -1,3 +1,5 @@
+0.3.7 Pass-through underlying exception's message into `message` field on JSONRPC error
+
 0.3.6 Fix for RPC application and allow overriding JSON serializer
 
 - Feature - allow override JSON Encoder and Decoder by overriding *Serializer class
