@@ -53,8 +53,8 @@ class RPCFault(RPCError):
 
     error_code = None
 
-    def __init__(self, error_data=None, request_id=None, *args, **kw):
-        RPCError.__init__(self, ERROR_MESSAGE.get(self.error_code, None), *args, **kw)
+    def __init__(self, error_data=None, request_id=None, message=None, *args, **kw):
+        RPCError.__init__(self, message or ERROR_MESSAGE.get(self.error_code, None), *args, **kw)
 
         self.error_data = error_data
         self.request_id = request_id

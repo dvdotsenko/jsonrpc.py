@@ -85,6 +85,7 @@ class JSONPRCApplicationTestSuite(TestCase):
         response_json = responses[0]
         assert 'error' in response_json
         assert set(response_json['error'].keys()) == {'code', 'message', 'data'}
+        assert response_json['error']['message'] == 'Blowing up on command' # actual .message from the raised error
         assert response_json['id'] == request1['id']
 
         response_json = responses[1]
