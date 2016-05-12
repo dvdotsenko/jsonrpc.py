@@ -66,7 +66,7 @@ class JSONPRCApplication(JSONPRCCollection):
         super(JSONPRCApplication, self).__init__(*args, **kw)
         self._data_serializer = data_serializer
 
-    def process_method(self, method, args, kwargs, request_id=None):
+    def process_method(self, method, args, kwargs, request_id=None, **context):
         """
         Executes the actual method with args, kwargs provided.
 
@@ -83,14 +83,35 @@ class JSONPRCApplication(JSONPRCCollection):
         :param kargs: A dict of none or more named args to pass to the method call
         :type kargs: dict
         :param request_id: None or non-None value of the `id` attribute in JSON-RPC request
+        :param context:
+            A dict with additional parameters passed to handle_request_string and process_requests
+            Allows wrapping code to pass additional parameters deep into parsing stack, override this
+            method and fold the parameters as needed into tha method call.
+            Imagine capturing authentication / permissions data from headers, converting them into
+            actionable / flag objects and putting them into **context.
+            Then override this method and fold the arguments into the call
+            (which may be a decorated function, where decorator unfolds the params and calls the actual method)
+            By default, context is not passed to method call below.
         :return: The value method returns
         """
         return method(*([] if args is None else args), **({} if kwargs is None else kwargs))
 
-    def process_requests(self, requests):
+    def process_requests(self, requests, **context):
         """
         Turns a list of request objects into a list of
         response objects.
+
+        :param requests: A list of tuples describing the RPC call
+        :type requests: list[list[callable,object,object,list]]
+        :param context:
+            A dict with additional parameters passed to handle_request_string and process_requests
+            Allows wrapping code to pass additional parameters deep into parsing stack, override this
+            method and fold the parameters as needed into tha method call.
+            Imagine capturing authentication / permissions data from headers, converting them into
+            actionable / flag objects and putting them into **context.
+            Then override this method and fold the arguments into the call
+            (which may be a decorated function, where decorator unfolds the params and calls the actual method)
+            By default, context is not passed to method call below.
         """
 
         ds = self._data_serializer
@@ -120,7 +141,13 @@ class JSONPRCApplication(JSONPRCCollection):
                     kwargs = params
                 elif params: # and/or must be type(params, list):
                     args = params
-                result = self.process_method(self[method], args, kwargs, request_id=request_id)
+                result = self.process_method(
+                    self[method],
+                    args,
+                    kwargs,
+                    request_id=request_id,
+                    **context
+                )
                 if request_id:
                     responses.append(ds.assemble_response(result, request_id))
             except errors.RPCFault as ex:
@@ -139,12 +166,20 @@ class JSONPRCApplication(JSONPRCCollection):
 
         return responses
 
-    def handle_request_string(self, request_string):
+    def handle_request_string(self, request_string, **context):
         """Handle a RPC-Request.
 
-        :Parameters:
-            - request_string: the received rpc-string
-        :Returns: the encoded (serialized as string) JSON of the response
+        :param request_string: the received rpc-string
+        :param context:
+            A dict with additional parameters passed to process_requests and process_method
+            Allows wrapping code to pass additional parameters deep into parsing stack, override process_method
+            method and fold the parameters as needed into tha method call.
+            Imagine capturing authentication / permissions data from headers, converting them into
+            actionable / flag objects and putting them into **context.
+            Then override this method and fold the arguments into the call
+            (which may be a decorated function, where decorator unfolds the params and calls the actual method)
+            By default, context is not passed to method call below.
+        :return: the encoded (serialized as string) JSON of the response
         """
 
         ds = self._data_serializer
@@ -161,7 +196,7 @@ class JSONPRCApplication(JSONPRCCollection):
                 )
             ))
 
-        responses = self.process_requests(requests)
+        responses = self.process_requests(requests, **context)
 
         if not responses:
             return None

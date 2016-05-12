@@ -122,6 +122,63 @@ class JSONPRCApplicationTestSuite(TestCase):
         assert response_json['result'] == 7
 
 
+class JSONRPCApplicationNonStandardProcessMethodOverride(TestCase):
+
+    def setUp(self):
+        super(JSONRPCApplicationNonStandardProcessMethodOverride, self).setUp()
+
+        def pass_through(*args, **kwargs):
+            return args, kwargs
+
+        class _CustomOverride(JSONPRCApplication):
+
+            def process_method(self, method, args, kwargs, request_id=None, **context):
+
+                # folding stuff into call kwargs
+                context.update(kwargs)
+                context['request_id'] = request_id
+
+                return method(
+                    *([] if args is None else args),
+                    **context
+                )
+
+        self.app = _CustomOverride(JSONRPC20Serializer)
+        self.app.register_function(pass_through)
+
+    def test_handle_request_string(self):
+
+
+        request1 = JSONRPC20Serializer.assemble_request(
+            'pass_through',
+            (2, 3)
+        )
+        request_id = request1['id']
+
+        requests_string = JSONRPC20Serializer.json_dumps(request1)
+
+        response_string = self.app.handle_request_string(
+            requests_string,
+            some_context_data='value',
+            more_context_data=['value']
+        )
+
+        response_json = JSONRPC20Serializer.json_loads(response_string)
+
+        assert 'error' not in response_json
+        assert response_json['id'] == request1['id']
+        args, kwargs = response_json['result']
+        assert args == [2, 3]
+        self.assertEqual(
+            dict(
+                request_id=request_id,
+                some_context_data='value',
+                more_context_data=['value']
+            ),
+            kwargs
+        )
+
+
 class JSONPRCApplicationNonStandardJSONEncoderTestSuite(TestCase):
 
     def test_handle_request_string_non_standard_json_encoder(self):

@@ -1,3 +1,5 @@
+0.4.0 Expand on 0.3.8 and provide a way to inject context and pass it all the way to method call.
+
 0.3.8 Provide an easy way to override calling of the actual method callable (allowing to pass custom / context vars to it in subclass)
 
 0.3.7 Pass-through underlying exception's message into `message` field on JSONRPC error
