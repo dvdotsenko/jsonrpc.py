@@ -1,3 +1,5 @@
+0.3.8 Provide an easy way to override calling of the actual method callable (allowing to pass custom / context vars to it in subclass)
+
 0.3.7 Pass-through underlying exception's message into `message` field on JSONRPC error
 
 0.3.6 Fix for RPC application and allow overriding JSON serializer

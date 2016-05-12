@@ -66,6 +66,27 @@ class JSONPRCApplication(JSONPRCCollection):
         super(JSONPRCApplication, self).__init__(*args, **kw)
         self._data_serializer = data_serializer
 
+    def process_method(self, method, args, kwargs, request_id=None):
+        """
+        Executes the actual method with args, kwargs provided.
+
+        This step is broken out of the process_requests flow to
+        allow for ease of overriding the call in your subclass of this class.
+
+        In some cases it's preferable to make callee aware of the request_id
+        and easily overridable caller method allows for that.
+
+        :param method: A callable registered as JSON-RPC method
+        :type method: callable
+        :param args: A list of none or more positional args to pass to the method call
+        :type args: list
+        :param kargs: A dict of none or more named args to pass to the method call
+        :type kargs: dict
+        :param request_id: None or non-None value of the `id` attribute in JSON-RPC request
+        :return: The value method returns
+        """
+        return method(*([] if args is None else args), **({} if kwargs is None else kwargs))
+
     def process_requests(self, requests):
         """
         Turns a list of request objects into a list of
@@ -93,11 +114,13 @@ class JSONPRCApplication(JSONPRCCollection):
                 continue
 
             try:
+                args = []
+                kwargs = {}
                 if isinstance(params, dict):
-                    result = self[method](**params)
-                else:
-                    # this is where we allow not specifying params
-                    result = self[method](*(params or []))
+                    kwargs = params
+                elif params: # and/or must be type(params, list):
+                    args = params
+                result = self.process_method(self[method], args, kwargs, request_id=request_id)
                 if request_id:
                     responses.append(ds.assemble_response(result, request_id))
             except errors.RPCFault as ex:
