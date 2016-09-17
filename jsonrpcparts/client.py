@@ -9,6 +9,20 @@ import requests
 from . import errors
 from . import JSONRPC20Serializer
 
+class ResponseStatusError(Exception):
+    def __init__(self, json, response):
+        self.json = json
+        self.response = response
+
+    def __str__(self):
+        return('Bad Response {} to message {}'.format(
+            str(self.response), str(self.json)))
+
+    def __repr__(self):
+        return('ResponseStatusError({}, {})'.format(
+            repr(self.json), repr(self.response)))
+
+
 class Client(object):
 
     def __init__(self, data_serializer=JSONRPC20Serializer):
@@ -95,7 +109,9 @@ class WebClient(Client):
             headers={'Content-Type': 'application/json'}
         )
 
-        assert response.status_code == 200
+        if response.status_code != 200:
+            raise ResponseStatusError(request_json, response)
+
         if expect_response:
             return response.json()
 

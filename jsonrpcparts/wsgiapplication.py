@@ -51,14 +51,14 @@ class JSONPRCWSGIApplication(JSONPRCApplication):
         if response_string:
             headers = [
                 ('Content-Type', 'application/json'),
-                ('Content-Length', len(response_string))
+                ('Content-Length', str(len(response_string)))
             ]
             start_response('200 OK', headers)
             return [response_string]
         else:
             headers = [
                 ('Content-Type', 'text/plain'),
-                ('Content-Length', 0)
+                ('Content-Length', str(0))
             ]
             start_response('200 OK', headers)
             return []
