@@ -1,3 +1,5 @@
+0.4.1 RPC Client now emits more informative ResponseStatusError instead of AssertionError on bad server response. Server now assembles proper (str-formatted) headers
+
 0.4.0 Expand on 0.3.8 and provide a way to inject context and pass it all the way to method call.
 
 0.3.8 Provide an easy way to override calling of the actual method callable (allowing to pass custom / context vars to it in subclass)
